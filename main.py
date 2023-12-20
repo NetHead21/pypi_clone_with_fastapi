@@ -1,16 +1,37 @@
-# This is a sample Python script.
+import fastapi
+import fastapi_chameleon
+import uvicorn
+from starlette.staticfiles import StaticFiles
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from views import account
+from views import home
+from views import packages
+
+app = fastapi.FastAPI()
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def main():
+    configure(dev_mode=True)
+    uvicorn.run(app, host="127.0.0.1", port=8000, debug=True)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+def configure(dev_mode: bool):
+    configure_templates(dev_mode)
+    configure_routes()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+def configure_templates(dev_mode: bool):
+    fastapi_chameleon.global_init("templates", auto_reload=dev_mode)
+
+
+def configure_routes():
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    app.include_router(home.router)
+    app.include_router(account.router)
+    app.include_router(packages.router)
+
+
+if __name__ == "__main__":
+    main()
+else:
+    configure(dev_mode=False)
